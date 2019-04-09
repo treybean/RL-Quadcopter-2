@@ -1,4 +1,4 @@
-from keras import layers, models, optimizers
+from keras import layers, models, optimizers, regularizers
 from keras import backend as K
 
 
@@ -37,7 +37,9 @@ class Actor:
         net = layers.Dense(units=64)(net)
         net = layers.BatchNormalization()(net)
         net = layers.Activation("relu")(net)
-        # net = layers.Dense(units=32, activation="relu")(net)
+        net = layers.Dense(units=32)(net)
+        net = layers.BatchNormalization()(net)
+        net = layers.Activation("relu")(net)
 
         # net = layers.Dense(units=400, kernel_regularizer=layers.regularizers.l2(1e-2))(
         #     states

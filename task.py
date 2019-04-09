@@ -30,7 +30,7 @@ class Task:
 
         self.state_size = self.action_repeat * 6
         self.action_low = 300
-        self.action_high = 700
+        self.action_high = 900
         self.action_size = 4
 
         # Goal
@@ -43,19 +43,23 @@ class Task:
 
     def get_reward(self):
         """Uses current pose of sim to return reward."""
-        # reward = 2 * (self.sim.pose[2])
+        distance_to_target = self._distance_to_target()
 
         # Base reward function
-        reward = 10.0 / (self._distance_to_target() / 2)
+        # reward = 100.0 / ((distance_to_target + 0.1) / 5)
+        reward = (100.0 / (distance_to_target / 2)) ** 2
 
         # Punish flying low
-        reward -= 10 - self.sim.pose[2]
+        if self.sim.pose[2] <= 5:
+            reward -= 6 - self.sim.pose[2]
+
+        # Punish flying low
+        # if self.sim.pose[2] < 20:
+        #     reward -= 4 * (20 - self.sim.pose[2])
 
         # # Reward being within 1 unit radius of target
-        # if distance_to_target < 2:
-        #     reward += 100
-
-        # # Punish crashes
+        # if distance_to_target <= 15:
+        #     reward += 3 * (10 / distance_to_target)
 
         # Punish Euler angles more than 30 degrees
         # for angle in np.sin(self.sim.pose[3:]):
@@ -75,12 +79,12 @@ class Task:
             reward += self.get_reward()
             pose_all.append(self.sim.pose)
 
-        # Punish crashes and reward being in flight
-        if done:
-            if self._distance_to_target() < 15:
-                reward += 100
-            elif self.sim.pose[2] <= 0:
-                reward -= 10
+        # Punish crashes and reward being close to target
+        # if done:
+        #     if self._distance_to_target() < 15:
+        #         reward += 100
+        #     elif self.sim.pose[2] <= 0:
+        #         reward -= 10
 
         next_state = np.concatenate(pose_all)
         return next_state, reward, done
